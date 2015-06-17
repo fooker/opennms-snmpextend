@@ -29,7 +29,7 @@ public class SnippetsDataProvider implements DataProvider {
         final ImmutableSortedMap.Builder<ObjectId, Value> data = ImmutableSortedMap.naturalOrder();
 
         for (final Snippet snippet : this.snippetManager.findSnippets()) {
-            LOG.trace("Muniching snippet: {} - {}", snippet.getPath(), snippet.getPrefix());
+            LOG.trace("Munching snippet: {} - {}", snippet.getPath(), snippet.getPrefix());
 
 
             final Result result;
@@ -45,7 +45,7 @@ public class SnippetsDataProvider implements DataProvider {
             result.forEach(record -> {
                 final int index = nameToIndex(record.getName());
 
-                LOG.trace("Muniching record: {} @ {} : {}", record.getName(), index, record.getValue());
+                LOG.trace("Munching record: {} @ {} : {}", record.getName(), index, record.getValue());
 
                 data.put(BASE_OID.at(1).at(index), new StringValue(record.getName()));
                 data.put(BASE_OID.at(2).at(index), record.getValue());
