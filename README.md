@@ -8,7 +8,7 @@ mvn clean package
 ```
 and add the following line to `snmpd.conf`
 ```
-pass_persist 1.3.6.1.4.1.5813.1 /usr/bin/java -jar /path/to/your/source/opennms-snmpextend/target/org.opennms.snmpextend-1.0-SNAPSHOT-jar-with-dependencies.jar
+pass_persist 1.3.6.1.4.1.5813.1 /usr/bin/java -jar /path/to/your/source/opennms-snmpextend/agent/target/org.opennms.snmpextend-1.0-SNAPSHOT-jar-with-dependencies.jar
 ```
 After restarting the SNMP daemon, the data can be queried.
 
