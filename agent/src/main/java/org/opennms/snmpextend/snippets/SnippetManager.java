@@ -1,8 +1,10 @@
 package org.opennms.snmpextend.snippets;
 
+import org.opennms.snmpextend.args.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.script.ScriptEngineManager;
 import java.io.IOException;
@@ -22,26 +24,12 @@ public class SnippetManager {
 
     public final static ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
 
-    private static final Path SNIPPET_PATH;
+    private final Config config;
 
-    static {
-        Properties properties = new Properties();
+    @Inject
+    public SnippetManager(final Config config) {
+        this.config = config;
 
-        InputStream inputStream = SnippetManager.class.getClassLoader().getResourceAsStream("snmpextend.properties");
-        try {
-            if (inputStream != null) {
-                properties.load(inputStream);
-            }
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-
-        SNIPPET_PATH = Paths.get(properties.getProperty("path", "/etc/snmp/opennms"));
-    }
-
-
-    public SnippetManager() {
-        System.out.println(SNIPPET_PATH);
         SCRIPT_ENGINE_MANAGER.getEngineFactories().forEach(factory -> {
             LOG.trace("Available factory: {} ({})", factory.getEngineName(), factory.getExtensions());
         });
@@ -49,12 +37,12 @@ public class SnippetManager {
 
     public Set<Snippet> findSnippets() {
         try {
-            return Files.list(SNIPPET_PATH)
-                    .map(Snippet::new)
-                    .collect(Collectors.toSet());
+            return Files.list(this.config.getSnippetPath())
+                        .map(Snippet::new)
+                        .collect(Collectors.toSet());
 
         } catch (final Exception e) {
-            LOG.error("Failed to find snippets: {}", SNIPPET_PATH, e);
+            LOG.error("Failed to find snippets: {}", this.config.getSnippetPath(), e);
 
             return Collections.emptySet();
         }
