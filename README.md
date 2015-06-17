@@ -19,9 +19,9 @@ snmpwalk ... 127.0.0.1 .1.3.6.1.4.1.5813
 
 
 ## Snippets
-All snippets must be placed in `/stc/smnp/opennms` and have a extension matching the scripting language used by the script.
+All snippets must be placed in `/etc/smnp/opennms` and have a extension matching the scripting language used by the script.
 
-Example `.groovy` script:
+Example `test.groovy` script:
 ```
 results.addInteger("foo", 23);
 results.addInteger("bar", 42);
