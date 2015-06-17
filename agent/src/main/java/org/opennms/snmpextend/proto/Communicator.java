@@ -11,11 +11,9 @@ import java.io.*;
 import java.util.Map;
 
 @Singleton
-public class Communicator {
+public class Communicator implements Runnable {
 
     private final static Logger LOG = LoggerFactory.getLogger(Communicator.class);
-
-    public static final ObjectId BASE_OID = ObjectId.parse(".1.3.6.1.4.1.5813.1");
 
     public static final String REQUEST_PING = "PING";
     public static final String REQUEST_GET = "GET";
@@ -29,16 +27,25 @@ public class Communicator {
 
     private final DataProvider provider;
 
+    private final Reader rx;
+    private final Writer tx;
+
     @Inject
-    public Communicator(final DataProvider provider) {
+    public Communicator(final DataProvider provider,
+                        final Reader rx,
+                        final Writer tx) {
         this.provider = provider;
+
+        this.rx = rx;
+        this.tx = tx;
     }
 
-    public void runForever() {
+    @Override
+    public void run() {
         LOG.trace("Communicator running...");
 
-        try (final BufferedReader rx = new BufferedReader(new InputStreamReader(System.in));
-             final BufferedWriter tx = new BufferedWriter(new OutputStreamWriter(System.out))) {
+        try (final BufferedReader rx = new BufferedReader(this.rx);
+             final BufferedWriter tx = new BufferedWriter(this.tx)) {
             for (String request = rx.readLine(); request != null && !request.isEmpty(); request = rx.readLine()) {
                 LOG.trace("Received line: '{}'", request);
 
@@ -106,8 +113,6 @@ public class Communicator {
     }
 
     private String[] handleGet(final ObjectId oid) {
-        if (!oid.startsWith(BASE_OID)) return RESPONSE_NONE;
-
         // Get the value
         final Value value = this.provider.fetch().get(oid);
         if (value == null) {
@@ -119,8 +124,6 @@ public class Communicator {
     }
 
     private String[] handleGetNext(final ObjectId oid) {
-        if (!oid.startsWith(BASE_OID)) return RESPONSE_NONE;
-
         // Find the next (strict higher) OID
         final Map.Entry<ObjectId, Value> entry = this.provider.fetch().higherEntry(oid);
         if (entry == null) {
@@ -133,7 +136,7 @@ public class Communicator {
 
     private static String[] createResponse(final ObjectId oid,
                                            final Value value) {
-        return new String[] {
+        return new String[]{
                 oid.toString(),
                 value.getType(),
                 value.getValue()

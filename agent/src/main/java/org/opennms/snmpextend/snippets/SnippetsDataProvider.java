@@ -16,6 +16,8 @@ public class SnippetsDataProvider implements DataProvider {
 
     private final static Logger LOG = LoggerFactory.getLogger(SnippetsDataProvider.class);
 
+    public static final ObjectId BASE_OID = ObjectId.parse(".1.3.6.1.4.1.5813.1");
+
     private final SnippetManager snippetManager;
 
     public SnippetsDataProvider(final SnippetManager snippetManager) {
@@ -45,8 +47,8 @@ public class SnippetsDataProvider implements DataProvider {
 
                 LOG.trace("Muniching record: {} @ {} : {}", record.getName(), index, record.getValue());
 
-                data.put(Communicator.BASE_OID.at(1).at(index), new StringValue(record.getName()));
-                data.put(Communicator.BASE_OID.at(2).at(index), record.getValue());
+                data.put(BASE_OID.at(1).at(index), new StringValue(record.getName()));
+                data.put(BASE_OID.at(2).at(index), record.getValue());
             });
         }
 

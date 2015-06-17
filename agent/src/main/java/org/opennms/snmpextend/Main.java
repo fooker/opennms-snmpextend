@@ -11,7 +11,8 @@ import org.opennms.snmpextend.snippets.SnippetManager;
 import org.opennms.snmpextend.snippets.SnippetsDataProvider;
 
 import javax.inject.Inject;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 public class Main extends AbstractModule {
 
@@ -29,11 +30,19 @@ public class Main extends AbstractModule {
         return provider;
     }
 
+    @Provides
+    @Inject
+    protected Communicator communicator(final DataProvider dataProvider) {
+        return new Communicator(dataProvider,
+                                new InputStreamReader(System.in),
+                                new OutputStreamWriter(System.out));
+    }
+
     public static void main(final String... args) {
         final Injector injector = Guice.createInjector(new Main());
 
         final Communicator communicator = injector.getInstance(Communicator.class);
-        communicator.runForever();
+        communicator.run();
     }
 
 }
