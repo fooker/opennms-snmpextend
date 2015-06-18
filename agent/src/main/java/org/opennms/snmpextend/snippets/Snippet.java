@@ -2,6 +2,8 @@ package org.opennms.snmpextend.snippets;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
+import org.opennms.snmpextend.args.Config;
+import org.opennms.snmpextend.proto.ObjectId;
 import org.opennms.snmpextend.values.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +25,22 @@ public class Snippet {
 
     private final static Logger LOG = LoggerFactory.getLogger(Snippet.class);
 
+    private final Config config;
+
     private final Path path;
 
     private final String prefix;
 
     private final ScriptEngine scriptEngine;
 
-    public Snippet(final Path path) {
+    private Instant cachedTime = Instant.MIN;
+    private Result cachedData = null;
+
+    public Snippet(final Config config, final Path path) {
+        this.config = config;
         this.path = path;
+
+        // TODO: This is very fragile: fails on unknown extension, missing extension and other strange names
 
         final String filename = path.getFileName().toString();
 
@@ -55,20 +65,34 @@ public class Snippet {
     }
 
     public Result load() {
-        final Result.Builder result = Result.builder(this.prefix);
+        final Instant now = Instant.now();
 
-        // TODO: Use a context to redirect I/O
-        final Bindings bindings = this.scriptEngine.createBindings();
-        bindings.put("prefix", this.prefix);
-        bindings.put("results", result);
+        if (now.isAfter(cachedTime.plus(this.config.getCacheDuration()))) {
+            LOG.trace("Cache timed out - executing script...");
 
-        try (final BufferedReader r = Files.newBufferedReader(this.path)) {
-            this.scriptEngine.eval(r, bindings);
+            final Result.Builder result = Result.builder(this.prefix);
 
-        } catch (final IOException | ScriptException e) {
-            throw Throwables.propagate(e);
+            // TODO: Use a context to redirect I/O
+            final Bindings bindings = this.scriptEngine.createBindings();
+            bindings.put("prefix", this.prefix);
+            bindings.put("results", result);
+
+            try (final BufferedReader r = Files.newBufferedReader(this.path)) {
+                this.scriptEngine.eval(r, bindings);
+
+            } catch (final IOException | ScriptException e) {
+                throw Throwables.propagate(e);
+            }
+
+            this.cachedTime = now;
+            this.cachedData = result.build();
         }
 
-        return result.build();
+        return this.cachedData;
+    }
+
+    public void flush() {
+        this.cachedTime = Instant.MIN;
+        this.cachedData = null;
     }
 }

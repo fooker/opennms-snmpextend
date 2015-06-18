@@ -22,9 +22,6 @@ public class SnippetsDataProvider implements DataProvider {
 
     private final SnippetManager snippetManager;
 
-    private Instant cachedTime = Instant.MIN;
-    private NavigableMap<ObjectId, Value> cachedData = null;
-
     @Inject
     public SnippetsDataProvider(final Config config,
                                 final SnippetManager snippetManager) {
@@ -34,25 +31,10 @@ public class SnippetsDataProvider implements DataProvider {
 
     @Override
     public NavigableMap<ObjectId, Value> fetch() {
-
-        final Instant now = Instant.now();
-
-        if (now.isAfter(cachedTime.plus(this.config.getCacheDuration()))) {
-            LOG.trace("Cache timed out - reloading...");
-
-            this.cachedTime = now;
-            this.cachedData = this.load();
-        }
-
-        return this.cachedData;
-    }
-
-    private NavigableMap<ObjectId, Value> load() {
         final ImmutableSortedMap.Builder<ObjectId, Value> data = ImmutableSortedMap.naturalOrder();
 
-        for (final Snippet snippet : this.snippetManager.findSnippets()) {
+        for (final Snippet snippet : this.snippetManager.getSnippets()) {
             LOG.trace("Munching snippet: {} - {}", snippet.getPath(), snippet.getPrefix());
-
 
             final Result result;
 
