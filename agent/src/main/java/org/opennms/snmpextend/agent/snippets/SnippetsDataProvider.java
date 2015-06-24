@@ -38,7 +38,7 @@ public class SnippetsDataProvider implements DataProvider {
             final Result result;
 
             try {
-                result = snippet.load();
+                result = snippet.exec();
 
             } catch (final Exception e) {
                 LOG.error("Failed to execute snippet: {}", snippet.getPath(), e);

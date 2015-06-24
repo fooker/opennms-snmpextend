@@ -12,19 +12,49 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 
+/**
+ * A snippet.
+ * A snippet is a script filling a result container ({@link Result}). To reduce load, a call to {@link #exec()} may
+ * return cached values.
+ * <p>
+ * The script file name will be used to derive a prefix used for all result records returned by the script and the
+ * extension will be used to determine the script engine to use.
+ * <p>
+ * If the scripting engine used to handle the snippets script supports compiling, the script will be loaded only once
+ * and will be compiled for faster execution.
+ */
 public class Snippet {
 
     private final static Logger LOG = LoggerFactory.getLogger(Snippet.class);
 
+    /**
+     * The global {@link Config} instance.
+     */
     private final Config config;
 
+    /**
+     * The path of the script.
+     */
     private final Path path;
 
+    /**
+     * The prefix extracted from the script file name.
+     */
     private final String prefix;
 
+    /**
+     * The script engine used to execute the script.
+     */
     private final ScriptEngine scriptEngine;
 
+    /**
+     * The time the cache was filled.
+     */
     private Instant cachedTime;
+
+    /**
+     * The cached result returned by the last script run.
+     */
     private Result cachedData;
 
     /**
@@ -33,6 +63,12 @@ public class Snippet {
      */
     private CompiledScript script;
 
+    /**
+     * Create a new snippet.
+     *
+     * @param config the global config instance
+     * @param path   the path to the script of the snippet
+     */
     public Snippet(final Config config, final Path path) {
         this.config = config;
         this.path = path;
@@ -56,15 +92,34 @@ public class Snippet {
         this.flush();
     }
 
+    /**
+     * Returns the path to the script of the snippet.
+     *
+     * @return the path to the script of the snippet
+     */
     public Path getPath() {
         return this.path;
     }
 
+    /**
+     * Returns prefix extracted from the script file name.
+     *
+     * @return prefix extracted from the script file name
+     */
     public String getPrefix() {
         return this.prefix;
     }
 
-    public Result load() {
+    /**
+     * Execute the script.
+     * <p>
+     * The script will only be executed if there is no cached result available or the cache is outdated. If the used
+     * script engine does not support compiling, the script is read from disc and executed. If it does support
+     * compiling, the compiled script is executed.
+     *
+     * @return the result returned by the script run
+     */
+    public Result exec() {
         final Instant now = Instant.now();
 
         if (now.isAfter(cachedTime.plus(this.config.getCacheDuration()))) {
@@ -102,6 +157,9 @@ public class Snippet {
         return this.cachedData;
     }
 
+    /**
+     * Flush the caches and recompile the script if possible.
+     */
     public void flush() {
         // Reset the cache data and time
         this.cachedTime = Instant.MIN;

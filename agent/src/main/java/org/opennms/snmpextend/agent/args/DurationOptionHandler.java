@@ -8,6 +8,9 @@ import org.kohsuke.args4j.spi.Setter;
 
 import java.time.Duration;
 
+/**
+ * The option handler used to parse durations.
+ */
 public class DurationOptionHandler extends OneArgumentOptionHandler<Duration> {
     public DurationOptionHandler(final CmdLineParser parser,
                                  final OptionDef option,

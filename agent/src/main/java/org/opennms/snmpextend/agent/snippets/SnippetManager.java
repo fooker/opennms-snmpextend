@@ -15,18 +15,34 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Manages the snippets.
+ * The manager runs in background and synchronizes the files in the snippet base folder with snippet instances using a
+ * filesystem watcher. Every time a file is added to the snippet foler, a {@link Snippet} instance is created for that
+ * file, when the file is modified, the cache is flushed and after a file is deleted, the instance is removed.
+ */
 @Singleton
 public class SnippetManager extends Thread {
 
     private final static Logger LOG = LoggerFactory.getLogger(SnippetManager.class);
 
+    /**
+     * The manager for all scripting engines.
+     */
     public final static ScriptEngineManager SCRIPT_ENGINE_MANAGER = new ScriptEngineManager();
 
+    /**
+     * The global {@link Config}.
+     */
     private final Config config;
 
+    /**
+     * The mapping between paths and {@link Snippet} instances for all known paths.
+     */
     private final ConcurrentMap<Path, Snippet> snippets;
 
     static {
+        // Log all known scripting engines for debugging
         SCRIPT_ENGINE_MANAGER.getEngineFactories().forEach(factory -> {
             LOG.trace("Available factory: {} ({})", factory.getEngineName(), factory.getExtensions());
         });
@@ -36,6 +52,7 @@ public class SnippetManager extends Thread {
     public SnippetManager(final Config config) {
         this.config = config;
 
+        // Initial populate the list of known snippets
         try {
             this.snippets = Files.list(this.config.getSnippetPath())
                                  .collect(Collectors.toConcurrentMap(Function.identity(),
@@ -53,6 +70,7 @@ public class SnippetManager extends Thread {
 
     @Override
     public void run() {
+        // Watch for filesystem changes
         try (final WatchService watchService = FileSystems.getDefault().newWatchService()) {
             this.config.getSnippetPath().register(watchService,
                                                   StandardWatchEventKinds.ENTRY_CREATE,
@@ -62,6 +80,7 @@ public class SnippetManager extends Thread {
 
             LOG.trace("Directory watcher registered");
 
+            // Loop forever (there is no exit condition as this is a daemon thread)
             while (true) {
                 try {
                     final WatchKey watchKey = watchService.take();
@@ -69,24 +88,32 @@ public class SnippetManager extends Thread {
                     for (WatchEvent<?> watchEvent : watchKey.pollEvents()) {
                         final Path path = this.config.getSnippetPath().resolve((Path) watchEvent.context());
 
-                        LOG.trace("Got directory watcher event: {} > {} ({})", path, watchEvent.kind(), watchEvent.count());
+                        LOG.trace("Got directory watcher event: {} > {} ({})",
+                                  path,
+                                  watchEvent.kind(),
+                                  watchEvent.count());
 
                         if (StandardWatchEventKinds.OVERFLOW == watchEvent.kind()) {
                             LOG.warn("Directory watching events lost...");
 
+                            // TODO: Reload the while snippet list (do it atomic)
+
                         } else if (StandardWatchEventKinds.ENTRY_CREATE == watchEvent.kind()) {
                             LOG.trace("Snippet added: {}", path);
 
+                            // Got a new file - create a new snippet
                             this.snippets.put(path, new Snippet(config, path));
 
                         } else if (StandardWatchEventKinds.ENTRY_MODIFY == watchEvent.kind()) {
                             LOG.trace("Snippet modified: {}", path);
 
+                            // File was modified - flush the cache
                             this.snippets.get(path).flush();
 
                         } else if (StandardWatchEventKinds.ENTRY_DELETE == watchEvent.kind()) {
                             LOG.trace("Snippet deleted: {}", path);
 
+                            // File was removed - delete the snippet
                             this.snippets.remove(path);
                         }
                     }
@@ -98,13 +125,17 @@ public class SnippetManager extends Thread {
                 }
             }
 
-
         } catch (final IOException e) {
             LOG.error("Failed to create filesystem watcher");
             throw Throwables.propagate(e);
         }
     }
 
+    /**
+     * Returns all known snippets.
+     *
+     * @return all known snippets
+     */
     public Collection<Snippet> getSnippets() {
         return this.snippets.values();
     }

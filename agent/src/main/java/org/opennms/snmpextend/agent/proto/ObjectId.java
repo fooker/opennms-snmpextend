@@ -9,20 +9,45 @@ import java.util.*;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * A SNMP object ID.
+ */
 public class ObjectId implements Comparable<ObjectId> {
 
+    /**
+     * The root (empty) object ID.
+     */
     public static final ObjectId ROOT = new ObjectId();
 
+    /**
+     * The parts the object ID is build of.
+     */
     private final List<Integer> parts;
 
+    /**
+     * Build an object ID from a list of parts.
+     *
+     * @param parts the parts the object ID is build of
+     */
     private ObjectId(final List<Integer> parts) {
         this.parts = parts;
     }
 
+    /**
+     * Build an object ID from a array of parts.
+     *
+     * @param parts the parts the object ID is build of
+     */
     private ObjectId(final int... parts) {
         this(Ints.asList(parts));
     }
 
+    /**
+     * Create a direct child of the object ID by attaching the passed ID.
+     *
+     * @param part the ID to attach.
+     * @return the new object ID
+     */
     public ObjectId at(final int part) {
         return new ObjectId(ImmutableList.<Integer>builder()
                                          .addAll(this.parts)
@@ -30,6 +55,12 @@ public class ObjectId implements Comparable<ObjectId> {
                                          .build());
     }
 
+    /**
+     * Create a direct child of the object ID by attaching the passed IDs.
+     *
+     * @param parts the IDs to attach.
+     * @return the new object ID
+     */
     public ObjectId at(final int... parts) {
         return new ObjectId(ImmutableList.<Integer>builder()
                                          .addAll(this.parts)
@@ -81,10 +112,22 @@ public class ObjectId implements Comparable<ObjectId> {
         return '.' + Joiner.on('.').join(this.parts);
     }
 
+    /**
+     * Build an object ID from a array of parts.
+     *
+     * @param parts the parts the object ID is build of
+     */
     public static ObjectId get(final int... parts) {
         return new ObjectId(parts);
     }
 
+    /**
+     * Parse the given string to an object ID.
+     * The passed string must be an ObjectID with an optional leading dot.
+     *
+     * @param oid the object ID to parse
+     * @return the object ID
+     */
     public static ObjectId parse(final String oid) {
         return new ObjectId(Splitter.on('.')
                                     .omitEmptyStrings()
@@ -94,10 +137,21 @@ public class ObjectId implements Comparable<ObjectId> {
                                     .collect(Collectors.toList()));
     }
 
+    /**
+     * Get the parts of the object ID as list.
+     *
+     * @return the list of parts
+     */
     public List<Integer> getParts() {
         return parts;
     }
 
+    /**
+     * Checks if this object ID is a child of the passed object ID.
+     *
+     * @param baseOid the parent object ID to check for
+     * @return {@code true} if it's a child, {@code false} otherwise
+     */
     public boolean startsWith(final ObjectId baseOid) {
         if (baseOid.parts.size() > this.parts.size()) {
             return false;

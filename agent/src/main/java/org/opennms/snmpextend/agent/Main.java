@@ -13,8 +13,16 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 
+/**
+ * Main executable.
+ */
 public class Main {
 
+    /**
+     * Start the whole thing.
+     *
+     * @param args the command line args
+     */
     public static void main(final String... args) {
         final Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
@@ -28,6 +36,7 @@ public class Main {
             }
         });
 
+        // Start and run the communicator
         final Communicator communicator = injector.getInstance(Communicator.class);
         communicator.run();
     }
