@@ -20,6 +20,8 @@ snmpwalk ... 127.0.0.1 .1.3.6.1.4.1.5813
 To collect the data, the collector from `/path/to/your/source/opennms-snmpextend/collector/target/org.opennms.snmpextend.collector-1.0-SNAPSHOT.jar` must be dropped in to the OpenNMS `lib` folder.
 This can be done by linking or copying.
 
+To configure the data collection copy `/path/to/your/source/opennms-snmpextend/resources/etc/snmp-extend-config.xml` to OpenNMS `etc` directory.
+
 In addition, the following definitions must be added to the OpenNMS `etc/collectd-configuration.xml` file:
 ```
 <collectd-configuration ...>
@@ -58,3 +60,5 @@ SNMPv2-SMI::enterprises.5813.1.1.93397 = STRING: "testFoo"
 SNMPv2-SMI::enterprises.5813.1.2.23430 = INTEGER: 42
 SNMPv2-SMI::enterprises.5813.1.2.93397 = INTEGER: 23
 ```
+
+Example snippets can be found in `/path/to/your/source/opennms-snmpextend/resources/snippets`.
