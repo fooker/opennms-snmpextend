@@ -17,6 +17,30 @@ The following command can be used to test:
 snmpwalk ... 127.0.0.1 .1.3.6.1.4.1.5813
 ```
 
+To collect the data, the collector from `/path/to/your/source/opennms-snmpextend/collector/target/org.opennms.snmpextend.collector-1.0-SNAPSHOT.jar` must be dropped in to the OpenNMS `lib` folder.
+This can be done by linking or copying.
+
+In addition, the following definitions must be added to the OpenNMS `etc/collectd-configuration.xml` file:
+```
+<collectd-configuration ...>
+  <package name="example1">
+    ...
+
+    <service name="SNMPext" interval="5000" user-defined="false" status="on">
+      <parameter key="collection" value="default"/>
+      <parameter key="thresholding-enabled" value="true"/>
+    </service>
+  </package>
+
+  ...
+
+  <collector service="SNMPext" class-name="org.opennms.snmpextend.collector.SnmpExtendCollector"/>
+
+  ...
+</collectd-configuration>
+```
+
+And restart OpenNMS.
 
 ## Snippets
 All snippets must be placed in `/etc/smnp/opennms` and have a extension matching the scripting language used by the script.
