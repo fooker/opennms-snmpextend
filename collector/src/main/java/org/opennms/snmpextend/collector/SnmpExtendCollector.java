@@ -7,11 +7,10 @@ import org.opennms.netmgt.collection.api.*;
 import org.opennms.netmgt.events.api.EventProxy;
 import org.opennms.netmgt.rrd.RrdRepository;
 import org.opennms.netmgt.snmp.*;
+import org.opennms.snmpextend.collector.config.SnmpExtendConfigDaoJaxb;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Map;
 
 public class SnmpExtendCollector implements ServiceCollector {
@@ -33,7 +32,7 @@ public class SnmpExtendCollector implements ServiceCollector {
 
     @Override
     public void initialize(final CollectionAgent agent, final Map<String, Object> parameters) throws
-                                                                                              CollectionInitializationException {
+            CollectionInitializationException {
         ((SnmpCollectionAgent) agent).validateAgent();
     }
 
@@ -46,18 +45,18 @@ public class SnmpExtendCollector implements ServiceCollector {
     public CollectionSet collect(final CollectionAgent agent,
                                  final EventProxy eproxy,
                                  final Map<String, Object> parameters) throws
-                                                                       CollectionException {
+            CollectionException {
         final SnmpAgentConfig snmpAgentConfig = ((SnmpCollectionAgent) agent).getAgentConfig();
 
         final SnmpExtendCollectionSet collectionSet = new SnmpExtendCollectionSet(agent);
 
         final TableTracker tracker = new TableTracker(collectionSet,
-                                                      SNMP_EXT_NAME_ID,
-                                                      SNMP_EXT_VALUE_ID);
+                SNMP_EXT_NAME_ID,
+                SNMP_EXT_VALUE_ID);
 
         final SnmpWalker walker = SnmpUtils.createWalker(snmpAgentConfig,
-                                                         "SNMP Extend collector for " + agent.getHostAddress(),
-                                                         tracker);
+                "SNMP Extend collector for " + agent.getHostAddress(),
+                tracker);
         walker.start();
 
         try {
@@ -73,25 +72,17 @@ public class SnmpExtendCollector implements ServiceCollector {
             }
 
             throw new CollectionWarning("Collection failed due to: " + walker.getErrorMessage(),
-                                        walker.getErrorThrowable());
+                    walker.getErrorThrowable());
         }
 
         return collectionSet;
     }
 
+    public static void main(String args[]){
+        System.out.println(SnmpExtendConfigDaoJaxb.getInstance().getRrdRepository());
+    }
     @Override
     public RrdRepository getRrdRepository(final String collectionName) {
-        return new RrdRepository() {{
-            setStep(300);
-            setHeartBeat(600);
-            setRrdBaseDir(new File("/opt/opennms/share/rrd/snmpext/"));
-            setRraList(new ArrayList<String>() {{
-                add("RRA:AVERAGE:0.5:1:2016");
-                add("RRA:AVERAGE:0.5:12:1488");
-                add("RRA:AVERAGE:0.5:288:366");
-                add("RRA:MAX:0.5:288:366");
-                add("RRA:MIN:0.5:288:366");
-            }});
-        }};
+        return SnmpExtendConfigDaoJaxb.getInstance().getRrdRepository();
     }
 }
