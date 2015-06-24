@@ -1,4 +1,4 @@
-package org.opennms.snmpextend.values;
+package org.opennms.snmpextend.agent.values;
 
 public class StringValue extends Value {
 

@@ -1,7 +1,7 @@
-package org.opennms.snmpextend.proto;
+package org.opennms.snmpextend.agent.proto;
 
 import com.google.common.base.Throwables;
-import org.opennms.snmpextend.values.Value;
+import org.opennms.snmpextend.agent.values.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

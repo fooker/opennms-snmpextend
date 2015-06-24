@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableSortedMap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.opennms.snmpextend.proto.Communicator;
-import org.opennms.snmpextend.proto.ObjectId;
-import org.opennms.snmpextend.values.GaugeValue;
-import org.opennms.snmpextend.values.IntegerValue;
-import org.opennms.snmpextend.values.StringValue;
-import org.opennms.snmpextend.values.Value;
+import org.opennms.snmpextend.agent.proto.Communicator;
+import org.opennms.snmpextend.agent.proto.ObjectId;
+import org.opennms.snmpextend.agent.values.GaugeValue;
+import org.opennms.snmpextend.agent.values.IntegerValue;
+import org.opennms.snmpextend.agent.values.StringValue;
+import org.opennms.snmpextend.agent.values.Value;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

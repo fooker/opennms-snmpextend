@@ -1,11 +1,9 @@
-package org.opennms.snmpextend.proto;
+package org.opennms.snmpextend.agent.proto;
 
 import com.google.common.base.*;
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.primitives.Ints;
-import org.opennms.snmpextend.values.IntegerValue;
 
 import java.util.*;
 import java.util.Objects;

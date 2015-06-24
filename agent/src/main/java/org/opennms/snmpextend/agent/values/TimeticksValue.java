@@ -1,8 +1,6 @@
-package org.opennms.snmpextend.values;
+package org.opennms.snmpextend.agent.values;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 
 public class TimeticksValue extends Value {
 

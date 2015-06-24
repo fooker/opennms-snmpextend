@@ -1,25 +1,18 @@
-package org.opennms.snmpextend.snippets;
+package org.opennms.snmpextend.agent.snippets;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Maps;
-import org.opennms.snmpextend.args.Config;
-import org.opennms.snmpextend.proto.ObjectId;
-import org.opennms.snmpextend.values.Value;
+import org.opennms.snmpextend.agent.args.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.NavigableMap;
 
 public class Snippet {
 

@@ -1,6 +1,6 @@
-package org.opennms.snmpextend.values;
+package org.opennms.snmpextend.agent.values;
 
-import org.opennms.snmpextend.proto.ObjectId;
+import org.opennms.snmpextend.agent.proto.ObjectId;
 
 public class ObjectIdValue extends Value {
 

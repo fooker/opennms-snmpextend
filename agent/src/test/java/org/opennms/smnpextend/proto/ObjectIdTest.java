@@ -2,7 +2,7 @@ package org.opennms.smnpextend.proto;
 
 import org.hamcrest.comparator.ComparatorMatcherBuilder;
 import org.junit.Test;
-import org.opennms.snmpextend.proto.ObjectId;
+import org.opennms.snmpextend.agent.proto.ObjectId;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.Matchers.*;

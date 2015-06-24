@@ -1,17 +1,16 @@
-package org.opennms.snmpextend.snippets;
+package org.opennms.snmpextend.agent.snippets;
 
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.hash.Hashing;
-import org.opennms.snmpextend.args.Config;
-import org.opennms.snmpextend.proto.DataProvider;
-import org.opennms.snmpextend.proto.ObjectId;
-import org.opennms.snmpextend.values.StringValue;
-import org.opennms.snmpextend.values.Value;
+import org.opennms.snmpextend.agent.args.Config;
+import org.opennms.snmpextend.agent.proto.DataProvider;
+import org.opennms.snmpextend.agent.proto.ObjectId;
+import org.opennms.snmpextend.agent.values.StringValue;
+import org.opennms.snmpextend.agent.values.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.time.Instant;
 import java.util.NavigableMap;
 
 public class SnippetsDataProvider implements DataProvider {

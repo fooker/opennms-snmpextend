@@ -1,6 +1,6 @@
-package org.opennms.snmpextend.proto;
+package org.opennms.snmpextend.agent.proto;
 
-import org.opennms.snmpextend.values.Value;
+import org.opennms.snmpextend.agent.values.Value;
 
 import java.util.NavigableMap;
 

@@ -1,16 +1,13 @@
-package org.opennms.snmpextend;
+package org.opennms.snmpextend.agent;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Provides;
-import org.opennms.snmpextend.args.Config;
-import org.opennms.snmpextend.proto.Communicator;
-import org.opennms.snmpextend.proto.DataProvider;
-import org.opennms.snmpextend.snippets.SnippetManager;
-import org.opennms.snmpextend.snippets.SnippetsDataProvider;
+import org.opennms.snmpextend.agent.args.Config;
+import org.opennms.snmpextend.agent.proto.Communicator;
+import org.opennms.snmpextend.agent.snippets.SnippetsDataProvider;
+import org.opennms.snmpextend.agent.proto.DataProvider;
 
-import javax.inject.Inject;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;

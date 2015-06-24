@@ -1,10 +1,9 @@
-package org.opennms.snmpextend.snippets;
+package org.opennms.snmpextend.agent.snippets;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableRangeMap;
 import com.google.common.collect.ImmutableSortedMap;
-import org.opennms.snmpextend.proto.ObjectId;
-import org.opennms.snmpextend.values.*;
+import org.opennms.snmpextend.agent.proto.ObjectId;
+import org.opennms.snmpextend.agent.values.*;
 
 import java.net.InetAddress;
 import java.time.Duration;

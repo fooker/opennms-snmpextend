@@ -1,10 +1,10 @@
-package org.opennms.snmpextend.args;
+package org.opennms.snmpextend.agent.args;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.kohsuke.args4j.spi.PathOptionHandler;
-import org.opennms.snmpextend.proto.ObjectId;
+import org.opennms.snmpextend.agent.proto.ObjectId;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

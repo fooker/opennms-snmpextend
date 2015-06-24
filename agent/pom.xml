@@ -74,7 +74,7 @@
 
                     <archive>
                         <manifest>
-                            <mainClass>org.opennms.snmpextend.Main</mainClass>
+                            <mainClass>org.opennms.snmpextend.agent.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

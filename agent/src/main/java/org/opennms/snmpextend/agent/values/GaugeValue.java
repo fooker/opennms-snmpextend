@@ -1,10 +1,10 @@
-package org.opennms.snmpextend.values;
+package org.opennms.snmpextend.agent.values;
 
-public class IntegerValue extends Value {
+public class GaugeValue extends Value {
 
     private final int value;
 
-    public IntegerValue(final int value) {
+    public GaugeValue(final int value) {
         this.value = value;
     }
 
@@ -15,6 +15,6 @@ public class IntegerValue extends Value {
 
     @Override
     public String getType() {
-        return "INTEGER";
+        return "GAUGE";
     }
 }

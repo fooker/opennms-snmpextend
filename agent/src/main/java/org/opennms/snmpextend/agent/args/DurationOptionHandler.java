@@ -1,4 +1,4 @@
-package org.opennms.snmpextend.args;
+package org.opennms.snmpextend.agent.args;
 
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
