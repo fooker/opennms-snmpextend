@@ -1,7 +1,6 @@
 package org.opennms.snmpextend.agent.snippets;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSortedMap;
 import org.opennms.snmpextend.agent.proto.ObjectId;
 import org.opennms.snmpextend.agent.values.*;
 
@@ -9,6 +8,7 @@ import java.net.InetAddress;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A result container to fill by snippets.
@@ -53,12 +53,20 @@ public class Result implements Iterable<Result.Record> {
     private final List<Record> records;
 
     /**
+     * The cache TTL for the result.
+     */
+    private final Optional<Duration> cacheDuration;
+
+    /**
      * Create a result container.
      *
-     * @param records the records in the container
+     * @param records       the records in the container
+     * @param cacheDuration the cache duration for the records
      */
-    private Result(final List<Record> records) {
+    private Result(final List<Record> records,
+                   final Optional<Duration> cacheDuration) {
         this.records = records;
+        this.cacheDuration = cacheDuration;
     }
 
     @Override
@@ -67,9 +75,30 @@ public class Result implements Iterable<Result.Record> {
     }
 
     /**
+     * Returns the cache TTL for the result.
+     *
+     * @return the cache TTL for the result or {@code Optional.empty()} if no cache TTL was specified
+     */
+    public Optional<Duration> getCacheDuration() {
+        return this.cacheDuration;
+    }
+
+    /**
      * A Builder for the result container.
      */
     public static class Builder {
+
+        /**
+         * The prefix to use for all record names.
+         */
+        private final String prefix;
+
+        /**
+         * The cache TTL for the result.
+         *
+         * @see Result#cacheDuration
+         */
+        private Optional<Duration> cacheDuration = Optional.empty();
 
         /**
          * The list of records.
@@ -78,11 +107,6 @@ public class Result implements Iterable<Result.Record> {
          * @see org.opennms.snmpextend.agent.snippets.Result.Record
          */
         private final ImmutableList.Builder<Record> records = ImmutableList.builder();
-
-        /**
-         * The prefix to use for all record names.
-         */
-        private final String prefix;
 
         /**
          * Create a new builder.
@@ -106,10 +130,12 @@ public class Result implements Iterable<Result.Record> {
             final String extendedName;
             if (name.startsWith(this.prefix)) {
                 extendedName = name;
+
             } else {
                 extendedName = this.prefix + Character.toUpperCase(name.charAt(0)) + name.substring(1);
             }
 
+            // Build and add the record
             this.records.add(new Record(extendedName, value));
 
             return this;
@@ -193,12 +219,36 @@ public class Result implements Iterable<Result.Record> {
         }
 
         /**
+         * Set the cache to the given value.
+         *
+         * @param ttl the cache TTL for the result
+         * @return the builder itself
+         */
+        public Builder withCache(final Duration ttl) {
+            this.cacheDuration = Optional.ofNullable(ttl);
+
+            return this;
+        }
+
+        /**
+         * Set the cache to the given value.
+         *
+         * @param ttl the cache TTL for the result in seconds
+         * @return the builder itself
+         */
+        public Builder withCache(final long ttl) {
+            this.cacheDuration = Optional.of(Duration.ofSeconds(ttl));
+
+            return this;
+        }
+
+        /**
          * Build the final result container.
          *
          * @return the result container
          */
         public Result build() {
-            return new Result(this.records.build());
+            return new Result(this.records.build(), cacheDuration);
         }
     }
 

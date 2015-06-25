@@ -48,14 +48,14 @@ public class Snippet {
     private final ScriptEngine scriptEngine;
 
     /**
-     * The time the cache was filled.
+     * The point in time the cache expires.
      */
-    private Instant cachedTime;
+    private Instant cacheExpires;
 
     /**
      * The cached result returned by the last script run.
      */
-    private Result cachedData;
+    private Result cacheData;
 
     /**
      * The cache for the script compiled for faster execution (can be {@code null} if the engine does not support
@@ -122,15 +122,15 @@ public class Snippet {
     public Result exec() {
         final Instant now = Instant.now();
 
-        if (now.isAfter(cachedTime.plus(this.config.getCacheDuration()))) {
+        if (now.isAfter(this.cacheExpires)) {
             LOG.trace("Cache timed out - executing script...");
 
-            final Result.Builder result = Result.builder(this.prefix);
+            final Result.Builder resultBuilder = Result.builder(this.prefix);
 
             // TODO: Use a context to redirect I/O
             final Bindings bindings = this.scriptEngine.createBindings();
             bindings.put("prefix", this.prefix);
-            bindings.put("results", result);
+            bindings.put("results", resultBuilder);
 
             if (this.script != null) {
                 // Execute the compiled script
@@ -150,11 +150,17 @@ public class Snippet {
                 }
             }
 
-            this.cachedTime = now;
-            this.cachedData = result.build();
+            // Build the result from script
+            final Result result = resultBuilder.build();
+
+            // Update the cache and let it expire after the TTL specified by the script using the global configuration
+            // as fallback
+            this.cacheExpires = now.plus(result.getCacheDuration().orElse(this.config.getCacheDuration()));
+            this.cacheData = result;
         }
 
-        return this.cachedData;
+        // Return the (maybe updated) cached data
+        return this.cacheData;
     }
 
     /**
@@ -162,8 +168,8 @@ public class Snippet {
      */
     public void flush() {
         // Reset the cache data and time
-        this.cachedTime = Instant.MIN;
-        this.cachedData = null;
+        this.cacheExpires = Instant.MIN;
+        this.cacheData = null;
 
         // Try to compile the script if the engine supports it
         if (this.scriptEngine instanceof Compilable) {
