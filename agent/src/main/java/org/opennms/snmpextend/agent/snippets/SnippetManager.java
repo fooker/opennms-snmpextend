@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Manages the snippets.
@@ -55,8 +56,19 @@ public class SnippetManager extends Thread {
         // Initial populate the list of known snippets
         try {
             this.snippets = Files.list(this.config.getSnippetPath())
-                                 .collect(Collectors.toConcurrentMap(Function.identity(),
-                                                                     p -> new Snippet(config, p)));
+                                 .filter(SnippetManager::filterSnippets)
+                                 .flatMap(path -> {
+                                     try {
+                                         return Stream.of(new Snippet(this.config, path));
+
+                                     } catch (SnippetException e) {
+                                         LOG.error("Failed to load script: {}", path, e);
+                                         return Stream.empty();
+                                     }
+                                 })
+                                 .collect(Collectors.toConcurrentMap(Snippet::getPath,
+                                                                     Function.identity()));
+
         } catch (final IOException e) {
             LOG.error("Failed to open directory: {}", this.config.getSnippetPath());
             throw Throwables.propagate(e);
@@ -93,6 +105,11 @@ public class SnippetManager extends Thread {
                                   watchEvent.kind(),
                                   watchEvent.count());
 
+                        // Don't care about ignored paths
+                        if (!filterSnippets(path)) {
+                            continue;
+                        }
+
                         if (StandardWatchEventKinds.OVERFLOW == watchEvent.kind()) {
                             LOG.warn("Directory watching events lost...");
 
@@ -102,7 +119,12 @@ public class SnippetManager extends Thread {
                             LOG.trace("Snippet added: {}", path);
 
                             // Got a new file - create a new snippet
-                            this.snippets.put(path, new Snippet(config, path));
+                            try {
+                                this.snippets.put(path, new Snippet(config, path));
+
+                            } catch (final SnippetException e) {
+                                LOG.error("Failed to load script: {}", path, e);
+                            }
 
                         } else if (StandardWatchEventKinds.ENTRY_MODIFY == watchEvent.kind()) {
                             LOG.trace("Snippet modified: {}", path);
@@ -138,5 +160,39 @@ public class SnippetManager extends Thread {
      */
     public Collection<Snippet> getSnippets() {
         return this.snippets.values();
+    }
+
+    /**
+     * Predicate filtering out non-script paths.
+     *
+     * @param path the path to test
+     * @return {@code true} iff the path is a snippet candidate
+     */
+    private static boolean filterSnippets(final Path path) {
+        try {
+            // Skip directories
+            if (Files.isDirectory(path)) {
+                return false;
+            }
+
+            // Skip hidden files
+            if (Files.isHidden(path)) {
+                return false;
+            }
+
+            // Skip files without extension
+            if (!path.getFileSystem().getPathMatcher("glob:*.*").matches(path.getFileName())) {
+                return false;
+            }
+
+        } catch (final IOException e) {
+            LOG.error("Failed to open file: {}", path, e);
+
+            // Failed to read the file somehow - so don't try any further
+            return false;
+        }
+
+        // Give it a try
+        return true;
     }
 }

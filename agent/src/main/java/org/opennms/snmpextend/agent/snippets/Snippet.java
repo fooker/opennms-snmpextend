@@ -69,22 +69,32 @@ public class Snippet {
      * @param config the global config instance
      * @param path   the path to the script of the snippet
      */
-    public Snippet(final Config config, final Path path) {
+    public Snippet(final Config config, final Path path) throws SnippetException {
         this.config = config;
         this.path = path;
 
-        // TODO: This is very fragile: fails on unknown extension, missing extension and other strange names
-
+        // Get the filename from the path
         final String filename = path.getFileName().toString();
 
+        // Find the splitting point for name and extension
+        final int separator = filename.lastIndexOf('.');
+        if (separator <= 0 || separator >= filename.length()) {
+            // Don't have a separator of name or extension will be empty
+            throw new SnippetException(path, "Illegal file name");
+        }
+
         // Get the filename (without extension) as prefix
-        this.prefix = filename.substring(0, filename.lastIndexOf('.'));
+        this.prefix = filename.substring(0, separator);
 
         // Get the file extension
-        final String suffix = filename.substring(filename.lastIndexOf('.') + 1);
+        final String suffix = filename.substring(separator + 1);
 
         // Create the script engine used to execute the snippet
         this.scriptEngine = SnippetManager.SCRIPT_ENGINE_MANAGER.getEngineByExtension(suffix);
+        if (this.scriptEngine == null) {
+            // Can't find a engine suitable for the extension
+            throw new SnippetException(path, "Unknown script type (" + suffix + ")");
+        }
 
         LOG.trace("Use script engine for {} : {} > {}", filename, suffix, this.scriptEngine);
 
@@ -119,7 +129,7 @@ public class Snippet {
      *
      * @return the result returned by the script run
      */
-    public Result exec() {
+    public Result exec() throws SnippetException {
         final Instant now = Instant.now();
 
         if (now.isAfter(this.cacheExpires)) {
@@ -137,7 +147,7 @@ public class Snippet {
                 try {
                     this.script.eval(bindings);
                 } catch (final ScriptException e) {
-                    throw Throwables.propagate(e);
+                    throw new SnippetException(this.path, "Script failed to execute", e);
                 }
 
             } else {
@@ -145,8 +155,11 @@ public class Snippet {
                 try (final BufferedReader r = Files.newBufferedReader(this.path)) {
                     this.scriptEngine.eval(r, bindings);
 
-                } catch (final IOException | ScriptException e) {
-                    throw Throwables.propagate(e);
+                } catch (final IOException e) {
+                    throw new SnippetException(this.path, "Script failed to load", e);
+
+                } catch (final ScriptException e) {
+                    throw new SnippetException(this.path, "Script failed to execute", e);
                 }
             }
 
@@ -189,4 +202,6 @@ public class Snippet {
             }
         }
     }
+
+
 }
