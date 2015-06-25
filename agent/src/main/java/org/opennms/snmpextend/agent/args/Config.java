@@ -34,7 +34,7 @@ public class Config {
             metaVar = "OID",
             handler = ObjectIdOptionHandler.class,
             usage = "the base OID exported")
-    private ObjectId baseObjectId = ObjectId.get(1, 3, 6, 1, 4, 1, 5813, 1);
+    private ObjectId baseObjectId = ObjectId.get(1, 3, 6, 1, 4, 1, 5813, 2);
 
     /**
      * Parse the passed command line arguments and propagate them to the instance

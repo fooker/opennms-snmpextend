@@ -17,8 +17,8 @@ public class SnmpExtendCollector implements ServiceCollector {
 
     private static final Logger LOG = LoggerFactory.getLogger(SnmpExtendCollector.class);
 
-    public static final SnmpObjId SNMP_EXT_NAME_ID = SnmpObjId.get("1.3.6.1.4.1.5813.1.1");
-    public static final SnmpObjId SNMP_EXT_VALUE_ID = SnmpObjId.get("1.3.6.1.4.1.5813.1.2");
+    public static final SnmpObjId SNMP_EXT_NAME_ID = SnmpObjId.get("1.3.6.1.4.1.5813.2.1");
+    public static final SnmpObjId SNMP_EXT_VALUE_ID = SnmpObjId.get("1.3.6.1.4.1.5813.2.2");
 
     @Override
     public void initialize(final Map<String, String> parameters) throws CollectionInitializationException {
