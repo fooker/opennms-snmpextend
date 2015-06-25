@@ -47,6 +47,12 @@ And restart OpenNMS.
 ## Snippets
 All snippets must be placed in `/etc/smnp/opennms` and have a extension matching the scripting language used by the script.
 
+Changes to snippets are cached up immediately by the agent.
+Beside that, the results of a script are cached to avoid multiple executions.
+
+Each script can add its results to the `resources` object injected in the execution context.
+See the documentation of the of the `org.opennms.snmpextend.agent.snippets.Result.Builder` class for available methods.
+
 Example `test.groovy` script:
 ```
 results.addInteger("foo", 23);
