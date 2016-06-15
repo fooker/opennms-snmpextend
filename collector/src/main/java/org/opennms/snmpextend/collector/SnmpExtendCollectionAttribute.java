@@ -16,8 +16,12 @@ public class SnmpExtendCollectionAttribute extends AbstractCollectionAttribute {
     }
 
     @Override
-    public String getNumericValue() {
-        return this.value;
+    public Number getNumericValue() {
+        try {
+            return Double.valueOf(this.value);
+        } catch (final NumberFormatException e) {
+            return null;
+        }
     }
 
     @Override
